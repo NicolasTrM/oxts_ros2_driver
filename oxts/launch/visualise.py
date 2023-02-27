@@ -26,7 +26,7 @@ def generate_launch_description():
 
     use_sim_time = LaunchConfiguration("use_sim_time", default="False")
     use_rviz = LaunchConfiguration("use_rviz", default="True")
-    wait_for_init = LaunchConfiguration("wait_for_init", default="True")
+    wait_for_init = LaunchConfiguration("wait_for_init", default="False")
     ncom = LaunchConfiguration("ncom", default="")
     topic_prefix = LaunchConfiguration("topic_prefix", default="ins")
 
@@ -39,7 +39,7 @@ def generate_launch_description():
     )
     declare_wait_for_init = DeclareLaunchArgument(
         "wait_for_init",
-        default_value="True",
+        default_value="False",
         description="Whether to publish before NCOM initialisation",
     )
     declare_ncom = DeclareLaunchArgument(

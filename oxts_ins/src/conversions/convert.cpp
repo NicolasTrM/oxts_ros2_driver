@@ -15,6 +15,7 @@
 #include "oxts_ins/convert.hpp"
 
 namespace oxts_ins {
+#define TWO_DIM_ONLY 1
 
 void OxtsIns::ncomCallbackRegular(const oxts_msgs::msg::Ncom::SharedPtr msg) {
   // Add data to decoder
@@ -104,8 +105,12 @@ void OxtsIns::imu(std_msgs::msg::Header header) {
 void OxtsIns::tf(const std_msgs::msg::Header &header) {
   // Set the LRF if - we haven't set it before (unless using NCOM LRF)
   this->getLrf();
+  Lrf origine = this->lrf ;
+  #if TWO_DIM_ONLY 
+  //origine = RosNComWrapper::getmyOriginLrf();
+  #endif
   if (this->lrf_valid) {
-    auto odometry = RosNComWrapper::odometry(this->nrx, header, this->lrf);
+    auto odometry = RosNComWrapper::odometry(this->nrx, header, origine  );
     geometry_msgs::msg::TransformStamped tf_oxts;
     tf_oxts.header = header;
     tf_oxts.header.frame_id = this->pub_odometry_frame_id;
@@ -113,8 +118,42 @@ void OxtsIns::tf(const std_msgs::msg::Header &header) {
     tf_oxts.transform.translation.x = odometry.pose.pose.position.x;
     tf_oxts.transform.translation.y = odometry.pose.pose.position.y;
     tf_oxts.transform.translation.z = odometry.pose.pose.position.z;
+
     tf_oxts.transform.rotation = odometry.pose.pose.orientation;
+
+
+ #if TWO_DIM_ONLY 
+
+      tf_oxts.transform.translation.z = 0 ;
+      
+      tf_oxts.transform.rotation.x = 0;
+      tf_oxts.transform.rotation.y = 0;
+      double norm = sqrt ( pow( tf_oxts.transform.rotation.z  , 2) + pow( tf_oxts.transform.rotation.w , 2)  ) ;
+      tf_oxts.transform.rotation.z /= norm;
+      tf_oxts.transform.rotation.w /= norm;
+
+#endif
+
     tf_broadcaster_->sendTransform(tf_oxts);
+
+ 
+
+    geometry_msgs::msg::TransformStamped map_odom;
+    map_odom.header = header;
+    map_odom.header.frame_id = this->pub_odometry_frame_id;
+    map_odom.child_frame_id = "odom";
+    map_odom.transform.translation.x = 0.0 ; // nvsp_wFR.x();
+    map_odom.transform.translation.y = 0.0 ; // nvsp_wFR.y();
+    map_odom.transform.translation.z = 0.0 ; // nvsp_wFR.z();
+    map_odom.transform.rotation.x = 0.0 ; //  nvsp_wFR.x();
+    map_odom.transform.rotation.y = 0.0 ; //  nvsp_wFR.y();
+    map_odom.transform.rotation.z = 0.0 ; //  nvsp_wFR.z();
+    map_odom.transform.rotation.w = 1.0 ; // nvsp_wFR.w();
+    tf_broadcaster_->sendTransform(map_odom);
+
+
+
+
 
     auto vat = RosNComWrapper::getVat(this->nrx);
     auto nsp = RosNComWrapper::getNsp(this->nrx);
@@ -131,7 +170,49 @@ void OxtsIns::tf(const std_msgs::msg::Header &header) {
       tf_vat.transform.rotation.y = vat.y();
       tf_vat.transform.rotation.z = vat.z();
       tf_vat.transform.rotation.w = vat.w();
+
+ #if TWO_DIM_ONLY 
+
+      tf_vat.transform.translation.x = -1.1;
+      tf_vat.transform.translation.y = 0 ;
+      tf_vat.transform.translation.z = 0 ;
+      
+      tf_vat.transform.rotation.x = 0;
+      tf_vat.transform.rotation.y = 0;
+      tf_vat.transform.rotation.z = 0.0;
+      tf_vat.transform.rotation.w = 1.0;
+
+#endif
       tf_broadcaster_->sendTransform(tf_vat);
+
+      if (true){  
+          geometry_msgs::msg::TransformStamped tf_rear_wheel_right;
+          tf_rear_wheel_right.header = header;
+          tf_rear_wheel_right.header.frame_id = "rear_axle_link";
+          tf_rear_wheel_right.child_frame_id = "rear_right_wheel_link";
+          tf_rear_wheel_right.transform.translation.x = 0.0 ; // nvsp_wFR.x();
+          tf_rear_wheel_right.transform.translation.y = 0.99 ; // nvsp_wFR.y();
+          tf_rear_wheel_right.transform.translation.z = -0.0 ; // nvsp_wFR.z();
+          tf_rear_wheel_right.transform.rotation.x = 0.0 ; //  nvsp_wFR.x();
+          tf_rear_wheel_right.transform.rotation.y = 0.0 ; //  nvsp_wFR.y();
+          tf_rear_wheel_right.transform.rotation.z = 0.0 ; //  nvsp_wFR.z();
+          tf_rear_wheel_right.transform.rotation.w = 1.0 ; // nvsp_wFR.w();
+          tf_broadcaster_->sendTransform(tf_rear_wheel_right);
+
+
+          geometry_msgs::msg::TransformStamped tf_rear_wheel_left;
+          tf_rear_wheel_left.header = header;
+          tf_rear_wheel_left.header.frame_id = "rear_axle_link";
+          tf_rear_wheel_left.child_frame_id = "rear_left_wheel_link";
+          tf_rear_wheel_left.transform.translation.x = 0.0 ; // nvsp_wFR.x();
+          tf_rear_wheel_left.transform.translation.y = -0.99 ; // nvsp_wFR.y();
+          tf_rear_wheel_left.transform.translation.z = -0.0 ; // nvsp_wFR.z();
+          tf_rear_wheel_left.transform.rotation.x = 0.0 ; //  nvsp_wFR.x();
+          tf_rear_wheel_left.transform.rotation.y = 0.0 ; //  nvsp_wFR.y();
+          tf_rear_wheel_left.transform.rotation.z = 0.0 ; //  nvsp_wFR.z();
+          tf_rear_wheel_left.transform.rotation.w = 1.0 ; // nvsp_wFR.w();
+          tf_broadcaster_->sendTransform(tf_rear_wheel_left);
+      }
 
       if (true) // if vertical slip lever arm is valid
       {
@@ -152,7 +233,58 @@ void OxtsIns::tf(const std_msgs::msg::Header &header) {
         tf_front_axle.transform.rotation.y = vat.y();
         tf_front_axle.transform.rotation.z = vat.z();
         tf_front_axle.transform.rotation.w = vat.w();
+
+
+ #if TWO_DIM_ONLY 
+
+        tf_front_axle.transform.translation.x = 2.5 ;
+        tf_front_axle.transform.translation.y = 0.0 ; 
+        tf_front_axle.transform.translation.z = 0 ;
+        
+        tf_front_axle.transform.rotation.x = 0;
+        tf_front_axle.transform.rotation.y = 0; 
+        tf_front_axle.transform.rotation.z = 0 ;
+        tf_front_axle.transform.rotation.w = 1 ;
+
+#endif
+
+
         tf_broadcaster_->sendTransform(tf_front_axle);
+
+        // Aditionnal transforme wheels
+        if(true)
+        {
+          auto nvsp_wFR = nsp;
+          nvsp_wFR += tf2::quatRotate(vat, tf2::Vector3(2.6, -1.73/2, 0));
+
+          geometry_msgs::msg::TransformStamped tf_front_wheel_right;
+          tf_front_wheel_right.header = header;
+          tf_front_wheel_right.header.frame_id = "front_axle_link";
+          tf_front_wheel_right.child_frame_id = "caster_front_right_link";
+          tf_front_wheel_right.transform.translation.x = 0.0 ; // nvsp_wFR.x();
+          tf_front_wheel_right.transform.translation.y = -0.87 ; // nvsp_wFR.y();
+          tf_front_wheel_right.transform.translation.z = -0.0 ; // nvsp_wFR.z();
+          tf_front_wheel_right.transform.rotation.x = 0.0 ; //  nvsp_wFR.x();
+          tf_front_wheel_right.transform.rotation.y = 0.0 ; //  nvsp_wFR.y();
+          tf_front_wheel_right.transform.rotation.z = 0.0 ; //  nvsp_wFR.z();
+          tf_front_wheel_right.transform.rotation.w = 1.0 ; // nvsp_wFR.w();
+
+ #if TWO_DIM_ONLY 
+
+          tf_front_wheel_right.transform.translation.z = 0 ;
+           
+
+#endif
+          tf_broadcaster_->sendTransform(tf_front_wheel_right);
+
+
+           //OxTs_Tr_Point01
+          tf_front_wheel_right.header.frame_id = "front_axle_link";
+          tf_front_wheel_right.child_frame_id = "OxTs_Tr_Point01";
+          tf_front_wheel_right.transform.translation.y =  0.87 ; // nvsp_wFR.y();
+          tf_broadcaster_->sendTransform(tf_front_wheel_right);
+
+        }
       }
     }
   }
@@ -174,6 +306,8 @@ void OxtsIns::odometry(std_msgs::msg::Header header) {
       auto new_pose_stamped = geometry_msgs::msg::PoseStamped();
       new_pose_stamped.header = msg.header;
       new_pose_stamped.pose = msg.pose.pose;
+
+ 
       this->past_poses.push_back(new_pose_stamped);
     }
     pubOdometry_->publish(msg);
@@ -204,11 +338,13 @@ void OxtsIns::getLrf() {
     // mHeading is in NED. Get angle between LRF and ENU
     this->lrf.heading((nrx->mHeading - 90) * NAV_CONST::DEG2RADS);
     this->lrf_valid = true;
+
   } else if (!this->lrf_valid &&
              this->lrf_source == LRF_SOURCE::NCOM_FIRST_ENU) {
     this->lrf.origin(nrx->mLat, nrx->mLon, nrx->mAlt);
     this->lrf.heading((0.0) * NAV_CONST::DEG2RADS); // LRF aligned to ENU
     this->lrf_valid = true;
+ 
   }
 }
 

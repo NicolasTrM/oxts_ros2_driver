@@ -122,10 +122,11 @@ public:
     ncom_rate = this->declare_parameter("ncom_rate", 100);
     ncom_topic = this->declare_parameter("ncom_topic", "ncom");
     topic_prefix = this->declare_parameter("topic_prefix", "ins");
-    unit_ip = this->declare_parameter("unit_ip", "0.0.0.0");
+    //unit_ip = this->declare_parameter("unit_ip", "0.0.0.0");
+    unit_ip = this->declare_parameter("unit_ip", "192.168.8.36");
     unit_port = this->declare_parameter("unit_port", 3000);
     ncom_path = this->declare_parameter("ncom", std::string(""));
-    wait_for_init = this->declare_parameter("wait_for_init", true);
+    wait_for_init = this->declare_parameter("wait_for_init", false);
     timestamp_mode = this->declare_parameter("timestamp_mode", 0);
 
     ncomInterval = std::chrono::milliseconds(int(1000.0 / ncom_rate));
@@ -163,7 +164,7 @@ public:
     if (!ncom_path.empty()) {
       timer_ncom_callback = &OxtsDriver::timerNcomFileCallback;
       update_ncom = &OxtsDriver::getFilePacket;
-    } else {
+    } else { 
       timer_ncom_callback = &OxtsDriver::timerNcomSocketCallback;
       update_ncom = &OxtsDriver::getSocketPacket;
     }
@@ -171,6 +172,16 @@ public:
     // Wait for config to be populated in NCOM packets
     RCLCPP_INFO(this->get_logger(), "Waiting for INS config information...");
     while (nrx->mSerialNumber == 0 || nrx->mIsImu2VehHeadingValid == 0) {
+      RCLCPP_INFO(this->get_logger(), " 1nrx->mSerialNumber   : %i  ",   nrx->mSerialNumber   );
+      RCLCPP_INFO(this->get_logger(), " 1nrx->mIsImu2VehHeadingValid    : %i  ",   nrx->mIsImu2VehHeadingValid    );
+      RCLCPP_INFO(this->get_logger(), " 1nrx->mLat    : %f  ",  nrx->mLat  );
+      RCLCPP_INFO(this->get_logger(), " 1nrx->mLat    : %f  ",  nrx->mLon  ); 
+      OxtsDriver::getSocketPacket();
+      RCLCPP_INFO(this->get_logger(), " nrx->mSerialNumber   : %i  ",   nrx->mSerialNumber   );
+      RCLCPP_INFO(this->get_logger(), " nrx->mIsImu2VehHeadingValid    : %i  ",   nrx->mIsImu2VehHeadingValid    );
+      RCLCPP_INFO(this->get_logger(), " nrx->mLat    : %f  ",  nrx->mLat  );
+      RCLCPP_INFO(this->get_logger(), " nrx->mLat    : %f  ",  nrx->mLon  ); 
+      
       (*this.*update_ncom)();
     }
     RCLCPP_INFO(this->get_logger(), "INS config information received");

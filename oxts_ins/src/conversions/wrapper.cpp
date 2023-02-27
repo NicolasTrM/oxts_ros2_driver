@@ -67,6 +67,16 @@ tf2::Quaternion getBodyRPY(const NComRxC *nrx) {
   return rpyBodENU;
 }
 
+Lrf getmyOriginLrf( ) {
+  // Origin to use for map frame
+  //lat0Rad = radians(45.93449115)
+  //lon0Rad = radians(5.26769258)
+  return Lrf( 45.93449115   * NAV_CONST::DEG2RADS , 5.26769258 * NAV_CONST::DEG2RADS  ,  0 ,
+             // mRefHeading is in NED. Get angle between ENU and LRF
+             ( 90) * NAV_CONST::DEG2RADS);
+}
+
+
 Lrf getNcomLrf(const NComRxC *nrx) {
   // Origin to use for map frame
   return Lrf(nrx->mRefLat, nrx->mRefLon, nrx->mRefAlt,
@@ -329,7 +339,11 @@ nav_msgs::msg::Odometry odometry(const NComRxC *nrx,
   Point::Cart p_enu;
   p_enu = NavConversions::geodeticToEnu(nrx->mLat, nrx->mLon, nrx->mAlt,
                                         lrf.lat(), lrf.lon(), lrf.alt());
-
+//lat0Rad = radians(45.93449115) 0.801708111
+//lon0Rad = radians(5.26769258) 0.09193858,
+  p_enu = NavConversions::geodeticToEnu( nrx->mLat, nrx->mLon,  nrx->mAlt,
+                                        45.93449115 , 5.26769258 , lrf.alt());
+                                        
   Point::Cart p_lrf =
       NavConversions::enuToLrf(p_enu.x(), p_enu.y(), p_enu.z(), lrf.heading());
 

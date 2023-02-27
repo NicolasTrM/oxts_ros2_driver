@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+<robot name="RT1003"  xmlns:xacro="http://ros.org/wiki/xacro"> 
+
+  <xacro:property name="wheel_radius" value="0.36"/>
+  <xacro:property name="wheel_width" value="0.20"/>
+  <xacro:property name="RT_to_front_axle_x" value="2.20"/>
+  <xacro:property name="RT_to_front_axle_y" value="2.20"/>
+  <xacro:property name="RT_to_front_axle_z" value="2.20"/>
+  <xacro:property name="RT_to_rear_axle_x" value="-1.20"/>
+  <xacro:property name="RT_to_rear_axle_y" value="${ RT_to_front_axle_y}"/>
+  <xacro:property name="RT_to_rear_axle_z" value="${ RT_to_front_axle_z}"/>
+  <xacro:property name="front_axle_width" value="1.73"/>
+  <xacro:property name="rear_axle_width" value="2.1"/>
+  
+
+  <link name="oxts_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="-0.102 -0.024067 -0.015"/>
+      <geometry>
+        <mesh filename="package://oxts_ins/urdf/small_core.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="oxts_red">
+        <color rgba="0.792 0.094 0.11 1.0"/>
+      </material>
+    </visual>
+  </link>
+
+ <link name="base_footprint"/>
+  <joint name="base_joint" type="fixed">
+    <parent link="oxts_link"/>
+    <child link="base_footprint" />
+    <origin xyz="0 0 ${-wheel_radius}" rpy="0 0 0"/>
+  </joint>
+
+
+
+  <link name="rear_axle_link">
+    <visual>
+      <origin rpy="1.57075 0 0"/>
+      <geometry>
+        <cylinder length="1.6" radius="0.2"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="rear_axle_joint" type="floating">
+    <parent link="oxts_link"/>
+    <child link="rear_axle_link" />
+    <origin xyz="RT_to_rear_axle_x RT_to_rear_axle_y RT_to_rear_axle_z" rpy="0 0 0" />
+  </joint>
+
+  <link name="front_axle_link">
+    <visual>
+      <origin rpy="1.57075 0 0"/>
+      <geometry>
+        <cylinder length="1.6" radius="0.2"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="front_axle_joint" type="floating">
+    <parent link="oxts_link"/>
+    <child link="front_axle_link" />
+    <origin xyz="RT_to_front_axle_x RT_to_front_axle_y RT_to_front_axle_z"  rpy="0 0 0" />
+  </joint>
+
+
+
+
+
+
+
+
+  <joint name="front_right_joint" type="fixed">
+    <parent link="oxts_link"/>
+    <child link="front_right_link"/>
+    <origin xyz="${RT_to_front_axle_x} ${RT_to_front_axle_y +  front_axle_width/2.0}   ${RT_to_front_axle_z} " rpy="0 0 0"/>
+  </joint>
+
+  <link name="front_right_link">
+    <visual>
+      <origin xyz="0 ${wheel_width/2.0}  0" rpy="1.57  0 0"/>
+        <geometry>
+            <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      <material name="dark"/>
+    </visual> 
+ 
+  </link>
+
+
+
+
+  <joint name="front_left_joint" type="fixed">
+    <parent link="oxts_link"/>
+    <child link="front_left__link"/>
+    <origin xyz="${RT_to_front_axle_x} ${RT_to_front_axle_y -  front_axle_width/2.0}   ${RT_to_front_axle_z} " rpy="0 0 0"/>
+  </joint>
+
+  <link name="front_left_link">
+    <visual>
+      <origin xyz="0 ${wheel_width/2.0}  0" rpy="1.57  0 0"/>
+        <geometry>
+            <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      <material name="dark"/>
+    </visual> 
+ 
+  </link>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <link name="imu_link"> </link>
+  <joint name="imu_joint" type="fixed">
+    <parent link="oxts_link" />
+    <child link="imu_link" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <link name="navsat_link"> </link>
+  <joint name="navsat_joint" type="fixed">
+    <parent link="oxts_link" />
+    <child link="navsat_link" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+</robot>

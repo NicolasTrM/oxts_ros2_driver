@@ -3,8 +3,13 @@ oxts_driver:
 #===============================================================================
     # INS configuration (set up to match the unit)
     ## Unit IP address
-    unit_ip: 192.168.25.44
+    ## /*! IP address of the INS to connect to */
+    unit_ip: 195.0.0.65
+    unit_ip: 192.168.8.36
     ## Unit Port (3000 unless intentionally configured otherwise on the INS)
+    ## /*! Endpoint Port of the INS to be connected to. Default 3000 for NCom. */
+    unit_port: 50933  
+    unit_port: 5001
     unit_port: 3000
     ## Path of NCOM to replay (optional, must be absolute path)
     # ncom: /default/ncom/path.ncom 
@@ -22,4 +27,4 @@ oxts_driver:
 
     # 0 => Timestamped by the ROS node time (future default)
     # 1 => Timestamped from NCom
-    timestamp_mode : 1
+    timestamp_mode : 0 # default 0

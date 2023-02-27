@@ -218,7 +218,7 @@ public:
     pub_nav_sat_fix_rate = this->declare_parameter("pub_nav_sat_fix_rate", 0);
     pub_imu_flag = this->declare_parameter("pub_imu_flag", true);
     pub_velocity_rate = this->declare_parameter("pub_velocity_rate", 0);
-    pub_odometry_rate = this->declare_parameter("pub_odometry_rate", 0);
+    pub_odometry_rate = this->declare_parameter("pub_odometry_rate", 0); // initila 0
     pub_odometry_frame_id =
         this->declare_parameter("pub_odometry_frame_id", "map");
     pub_path_rate = this->declare_parameter("pub_path_rate", 0);

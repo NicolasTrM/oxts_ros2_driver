@@ -91,6 +91,12 @@ tf2::Quaternion getBodyRPY(const NComRxC *nrx);
  * NED
  */
 tf2::Quaternion getVehRPY(const NComRxC *nrx);
+
+/**
+ * Get origine transpolis  LRF
+ */
+Lrf getmyOriginLrf();
+
 /**
  * Get the LRF from the NCOM decoder
  */

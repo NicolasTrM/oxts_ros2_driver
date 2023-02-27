@@ -27,6 +27,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/LeverArm.msg"
   "msg/NavSatRef.msg"
   "msg/Ncom.msg"
+  "msg/NcomDecod.msg"
   DEPENDENCIES std_msgs
                geometry_msgs
   ADD_LINTER_TESTS

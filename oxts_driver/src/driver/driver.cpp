@@ -39,12 +39,24 @@ void OxtsDriver::getFilePacket() {
 }
 
 void OxtsDriver::getSocketPacket() {
+  RCLCPP_INFO(this->get_logger(),
+                 ">>>>>>>>>> Call  void OxtsDriver::getSocketPacket() "  );
+  RCLCPP_INFO(this->get_logger(),
+                 "Waiting new packet,  local port %i " ,
+                 this->unitEndpointNCom.port()   );
+  std::string s = this->unitEndpointNCom.address().to_string(); 
+  RCLCPP_INFO(this->get_logger(),
+                 "Waiting new packet, remote ip   %s " ,
+                 s.c_str()   );
   // Read from open socket
   std::size_t size = this->udpClient.receive_from(
-      this->buff, NCOM_PACKET_LENGTH, this->unitEndpointNCom);
+      this->buff, NCOM_PACKET_LENGTH, this->unitEndpointNCom );
   // Add data to decoder
   while (NComNewChars(this->nrx, this->buff, size) != COM_NEW_UPDATE) {
-  }
+    RCLCPP_INFO(this->get_logger(),
+                 "Waiting new packet, remote ip  local port %i " ,
+                 this->unitEndpointNCom.port()   );
+  } 
 }
 
 void OxtsDriver::publishPacket() {
@@ -114,8 +126,13 @@ rclcpp::Time OxtsDriver::getNcomTime(const NComRxC *nrx) {
   return time;
 }
 
-std::string OxtsDriver::getUnitIp() { return this->unit_ip; }
+std::string OxtsDriver::getUnitIp() { 
+  //RCLCPP_INFO(this->get_logger(), "getUnitIp : %s" , this->unit_ip.to_string() ); 
+  return this->unit_ip; 
+}
 
-short OxtsDriver::getUnitPort() { return this->unit_port; }
+short OxtsDriver::getUnitPort() { 
+  RCLCPP_INFO(this->get_logger(), "getUnitPort : %i " , this->unit_port ); 
+  return this->unit_port; }
 
 } // namespace oxts_driver
